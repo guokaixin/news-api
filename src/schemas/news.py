@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+from typing import Optional, List
 
 class NewsBase(BaseModel):
     title: str = Field(..., max_length=255, description="新闻标题")
@@ -12,14 +12,11 @@ class NewsResponse(NewsBase):
     created_at: datetime = Field(..., description="创建时间")
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
-class NewsListNonRESTResponse(BaseModel):
-    code: int = Field(200, description="响应码，200 成功，其他失败")
-    msg: str = Field("success", description="响应信息，成功或失败")
-    data: dict = Field(..., description="数据体，包含分页+新闻列表")
-
-class NewsDetailNonRESTResponse(BaseModel):
-    code: int = Field(200, description="响应码")
-    msg: str = Field("success", description="响应信息")
-    data: Optional[NewsResponse] = Field(None, description="新闻详情数据")
+class NewsListResponse(BaseModel):
+    total: int = Field(..., description="符合条件的总条数")
+    page: Optional[int] = Field(None, description="当前页码")
+    limit: Optional[int] = Field(None, description="每页条数")
+    offset: Optional[int] = Field(None, description="偏移量")
+    data: List[NewsResponse] = Field(..., description="新闻列表数据")

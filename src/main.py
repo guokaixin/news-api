@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.routes import router_non_rest as news_router_non_rest
+from src.api.routes import router as news_router
 
 app = FastAPI(
     title="新闻 API 服务",
@@ -18,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(news_router_non_rest)
+app.include_router(news_router)
 
 @app.get("/", description="news api 服务运行状态")
 def health_check():
