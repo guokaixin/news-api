@@ -8,7 +8,7 @@ class News(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     title = Column(String(255), index=True, nullable=False)
-    description = Column(Text, nullable=False)
+    description = Column(Text,  index=True, nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 

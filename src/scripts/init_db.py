@@ -1,10 +1,17 @@
-import pymysql
+import sys
 import os
+
+current_file = os.path.abspath(__file__)
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_file)))
+sys.path.append(project_root)
+
+import pymysql
 from dotenv import load_dotenv
 from src.config.database import engine, Base
 from src.models.news import News
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+
 
 load_dotenv()
 

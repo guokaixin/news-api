@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from src.models.news import News
 from typing import Optional
+from sqlalchemy.exc import SQLAlchemyError
 
 def get_news_list(
     db: Session,
@@ -24,13 +25,16 @@ def get_news_list(
     
     total = query.count()
     
+    if page is not None and offset is not None:
+        raise ValueError("page和offset不能同时使用，请选择一种分页方式")
+
     if page is not None and page < 1:
         page = 1
     if limit is not None:
         limit = max(1, min(limit, 100))
     if offset is not None and offset < 0:
         offset = 0
-    
+
     if offset is not None and limit is not None:
         query = query.offset(offset).limit(limit)
     elif page is not None and limit is not None:
@@ -45,4 +49,8 @@ def get_news_list(
     return total, news_list
 
 def get_news_detail(db: Session, news_id: int) -> Optional[News]:
-    return db.query(News).filter(News.id == news_id).first()
+    try:
+        return db.query(News).filter(News.id == news_id).first()
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise ValueError(f"查询新闻失败: {str(e)}")
