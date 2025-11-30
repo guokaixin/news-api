@@ -1,0 +1,48 @@
+services:
+  news-mysql:
+    image: mysql:8.0
+    container_name: news-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: news
+      MYSQL_USER: news_user
+      MYSQL_PASSWORD: 123456
+    command: --default-authentication-plugin=mysql_native_password --bind-address=0.0.0.0
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - news-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-unews_user", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 应用服务
+  api:
+    build: .
+    container_name: news-api
+    restart: always
+    depends_on:
+      news-mysql:  # 依赖名必须和数据库服务名一致
+        condition: service_healthy  # 确保数据库启动完成再启动应用
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=123456
+      - DB_HOST=news-mysql  # 容器间用服务名通信
+      - DB_PORT=3306
+      - DB_NAME=news
+    ports:
+      - "8000:8000"
+    networks:
+      - news-network
+
+networks:
+  news-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
